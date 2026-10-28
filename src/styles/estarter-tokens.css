@@ -1,0 +1,66 @@
+/**
+ * Estarter design tokens extracted from Estarter-new-main 2
+ * Source: app/globals.css + landing-home.tsx + bento-modules-section.css
+ */
+
+:root {
+  /* Brand */
+  --brand-blue: #107FF9;
+  --brand-blue-hover: #0c6fd6;
+  --brand-blue-soft: #147df5; /* bento accent variant */
+  --brand-navy: #09073e; /* logo wordmark dark */
+  --brand-navy-deep: #071124;
+  --brand-navy-2: #0c1830;
+
+  /* Neutrals (slate) */
+  --bg: #ffffff;
+  --bg-muted: #f8fafc; /* slate-50 */
+  --bg-soft: #f1f5f9; /* slate-100 */
+  --border: #e2e8f0; /* slate-200 */
+  --border-soft: #e8edf5;
+  --text: #0f172a; /* slate-900 */
+  --text-body: #101424;
+  --text-muted: #64748b; /* slate-500 */
+  --text-muted-2: #64718a;
+  --footer-bg: #0f172a; /* slate-900 */
+  --success: #10b981;
+
+  /* Semantic (shadcn / oklch equivalents) */
+  --primary: oklch(0.564 0.242 257); /* ≈ #107FF9 */
+  --primary-foreground: #ffffff;
+  --radius: 0.75rem; /* 12px base; landing uses fuller pills */
+
+  /* Typography */
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif; /* .font-landing */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-ui-fallback: "Geist", "Geist Fallback", sans-serif;
+
+  /* Layout */
+  --max-w-content: 1280px; /* lg/xl clamps: 1180 → 1280 → 1360 */
+  --header-offset: 72px;
+  --header-offset-md: 80px;
+  --section-y: clamp(2.5rem, 5vw, 6rem);
+
+  /* Shadows / glass */
+  --shadow-cta: 0 20px 25px -5px rgb(16 127 249 / 0.25);
+  --shadow-hero-card: 0 24px 80px rgba(15, 23, 42, 0.18);
+  --glass-border: rgba(255, 255, 255, 0.45);
+}
+
+/* CTA primary pattern (landing) */
+.cta-primary {
+  background: var(--brand-blue);
+  color: #fff;
+  box-shadow: var(--shadow-cta);
+  border-radius: 9999px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: all 150ms ease;
+}
+.cta-primary:hover {
+  background: var(--brand-blue-hover);
+}
+.cta-primary:active {
+  transform: scale(0.98);
+}
