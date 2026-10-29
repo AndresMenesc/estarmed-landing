@@ -7,6 +7,10 @@ const Results = dynamic(
   () => import("./results").then((m) => m.Results),
   { ssr: false },
 );
+const Clients = dynamic(
+  () => import("./clients").then((m) => m.Clients),
+  { ssr: false },
+);
 const BeforeAfter = dynamic(
   () => import("./before-after").then((m) => m.BeforeAfter),
   { ssr: false },
@@ -89,6 +93,7 @@ export function BelowFold() {
   return (
     <>
       <Results />
+      <Clients />
       <BeforeAfter />
       <HowItWorks />
       <ProductTabs />

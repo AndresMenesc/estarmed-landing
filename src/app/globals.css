@@ -199,3 +199,26 @@
     transition: none;
   }
 }
+
+@keyframes clients-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.clients-marquee-track {
+  animation: clients-marquee 32s linear infinite;
+}
+
+.clients-marquee:hover .clients-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clients-marquee-track {
+    animation: none;
+  }
+}

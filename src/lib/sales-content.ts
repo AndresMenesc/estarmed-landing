@@ -31,6 +31,49 @@ export const RESULTS_FOOTNOTE =
 
 export const RESULTS_SUBTITLE = "Nov 2025 – jul 2026, operación Comfama.";
 
+export const CLIENTS_SUBTITLE =
+  "Operan con EstarMed o son aliados de la plataforma.";
+
+/** Logos shown in Clientes y alianzas (paths under /public). */
+export const CLIENTS = [
+  {
+    id: "u-ventures",
+    name: "U Ventures",
+    src: "/brand/clients/u-ventures.png",
+    darkChip: true,
+  },
+  {
+    id: "estarter",
+    name: "estarter.co",
+    src: "/brand/clients/estarter.png",
+    darkChip: false,
+  },
+  {
+    id: "comfama",
+    name: "Comfama",
+    src: "/brand/clients/comfama.png",
+    darkChip: false,
+  },
+  {
+    id: "asisfarma",
+    name: "AsisFarma",
+    src: "/brand/clients/asisfarma.png",
+    darkChip: false,
+  },
+  {
+    id: "echavarria",
+    name: "Laboratorio Médico Echavarría",
+    src: "/brand/clients/echavarria.png",
+    darkChip: false,
+  },
+  {
+    id: "eafit",
+    name: "Universidad EAFIT",
+    src: "/brand/clients/eafit.png",
+    darkChip: false,
+  },
+] as const;
+
 /** Paired problem → fix (product modules). */
 export const COMPARISONS = [
   {
