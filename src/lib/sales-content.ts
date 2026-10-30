@@ -257,16 +257,56 @@ export const ROLES = [
   },
 ] as const;
 
+/** Funciones clave carousel — headline ≤6 words, body ≤20 words. */
 export const FEATURES = [
-  { title: "Optimización de ruta", line: "Compara alternativas por calles." },
-  { title: "Mapa en vivo", line: "Vehículos y recorrido del día." },
-  { title: "Historial GPS", line: "Reproduce el trazo por placa." },
-  { title: "Chats", line: "Admin, madrina y conductor." },
-  { title: "Push en vivo", line: "Llegadas, salidas y chat." },
-  { title: "Reportes y analítica", line: "Diario a las 6 p. m. y paneles." },
-  { title: "Logs", line: "Actividad que no se borra." },
-  { title: "Exportes", line: "PDF, CSV y Excel operativos." },
-  { title: "Gestión de Personas", line: "Pacientes, flota, CIS e importación." },
+  {
+    id: "ruta",
+    title: "Ruta Diaria",
+    line: "Rutas, checkpoints y visitas del día en una sola pantalla.",
+    bg: "ruta" as const,
+  },
+  {
+    id: "geo",
+    title: "Georreferencia",
+    line: "Valide direcciones y ubique cada visita en el mapa.",
+    bg: "geo" as const,
+  },
+  {
+    id: "mapa",
+    title: "Mapa en vivo",
+    line: "Vehículos y recorrido del día en tiempo real.",
+    bg: "mapa" as const,
+  },
+  {
+    id: "gps",
+    title: "Historial GPS",
+    line: "Reproduce el trazo por placa cuando lo necesite.",
+    bg: "gps" as const,
+  },
+  {
+    id: "chat",
+    title: "Chats",
+    line: "Admin, madrina y conductor en la misma conversación.",
+    bg: "chat" as const,
+  },
+  {
+    id: "soportes",
+    title: "Soportes",
+    line: "Foto de cierre y evidencia por visita y ruta.",
+    bg: "soportes" as const,
+  },
+  {
+    id: "liquidacion",
+    title: "Liquidación",
+    line: "Cierre operativo por tarifa; no es factura DIAN.",
+    bg: "liquidacion" as const,
+  },
+  {
+    id: "reportes",
+    title: "Reportes",
+    line: "Resumen diario a las 6 p. m. y paneles operativos.",
+    bg: "reportes" as const,
+  },
 ] as const;
 
 export const INTEGRATION = {

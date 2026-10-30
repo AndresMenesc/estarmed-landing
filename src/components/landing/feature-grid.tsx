@@ -1,257 +1,356 @@
 "use client";
 
 import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import Image from "next/image";
+import {
   Route,
+  MapPin,
   Map,
   Navigation,
   MessageSquare,
-  Bell,
+  Camera,
+  Receipt,
   BarChart3,
-  ScrollText,
-  Download,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 import { FEATURES, VISIT_STATUS } from "@/lib/sales-content";
+import { cn } from "@/lib/utils";
 import { Section } from "./section";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
 
 const ICONS: LucideIcon[] = [
   Route,
+  MapPin,
   Map,
   Navigation,
   MessageSquare,
-  Bell,
+  Camera,
+  Receipt,
   BarChart3,
-  ScrollText,
-  Download,
-  Users,
 ];
 
 export function FeatureGrid() {
+  const [active, setActive] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; active: number } | null>(null);
+
+  const select = useCallback((idx: number) => {
+    setActive((prev) => {
+      const next = Math.max(0, Math.min(FEATURES.length - 1, idx));
+      return next === prev ? prev : next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const el = trackRef.current?.querySelector<HTMLElement>(
+      `[data-feature-idx="${active}"]`
+    );
+    el?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [active]);
+
+  const onPointerDown = (e: ReactPointerEvent) => {
+    if (e.pointerType === "mouse") return;
+    drag.current = { x: e.clientX, active };
+  };
+
+  const onPointerUp = (e: ReactPointerEvent) => {
+    if (!drag.current || e.pointerType === "mouse") return;
+    const dx = e.clientX - drag.current.x;
+    const start = drag.current.active;
+    drag.current = null;
+    if (Math.abs(dx) < 40) return;
+    select(start + (dx < 0 ? 1 : -1));
+  };
+
   return (
     <Section id="funciones" labelledBy="funciones-heading" className="bg-slate-50">
       <Reveal>
         <SectionHeading
           id="funciones-heading"
+          align="center"
           eyebrow="Funciones clave"
           title="Más allá del día a día."
-          subtitle="Mapa, chat, reportes y exportes — fuera del flujo de la ruta."
+          subtitle="Mapa, chat, reportes y cierre — pantallas reales de la operación."
         />
       </Reveal>
 
-      <ul className="mt-10 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        ref={trackRef}
+        role="listbox"
+        aria-label="Funciones clave"
+        aria-activedescendant={`feature-card-${FEATURES[active].id}`}
+        className="mt-10 flex h-[min(28rem,72vw)] gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-y md:h-[32rem] md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          drag.current = null;
+        }}
+      >
         {FEATURES.map((f, idx) => {
           const Icon = ICONS[idx] ?? Route;
+          const open = active === idx;
           return (
-            <li key={f.title} className="h-full">
-              <Reveal delay={(idx % 3) * 0.05} className="h-full">
-                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-md hover:shadow-slate-200/70">
-                  <div
-                    className="border-b border-slate-100 bg-slate-50/80 px-3 py-3"
-                    aria-hidden="true"
-                  >
-                    <FeatureCrop index={idx} />
-                  </div>
-                  <div className="flex flex-1 gap-3 p-4">
-                    <span
-                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#007DFF]/10 text-[#007DFF]"
-                      aria-hidden="true"
-                    >
-                      <Icon className="size-4" strokeWidth={2.25} />
-                    </span>
-                    <div>
-                      <h3 className="font-display text-base font-bold text-[#0A1640]">
-                        {f.title}
-                      </h3>
-                      <p className="mt-0.5 text-sm font-medium text-slate-600">
-                        {f.line}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              </Reveal>
-            </li>
+            <button
+              key={f.id}
+              type="button"
+              role="option"
+              id={`feature-card-${f.id}`}
+              data-feature-idx={idx}
+              aria-selected={open}
+              aria-label={f.title}
+              onClick={() => select(idx)}
+              onMouseEnter={() => {
+                if (window.matchMedia("(hover: hover)").matches) select(idx);
+              }}
+              className={cn(
+                "group relative h-full shrink-0 overflow-hidden rounded-2xl text-left shadow-[0_12px_40px_-16px_rgba(10,22,64,0.45)] outline-none transition-[flex-grow,min-width,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-[#007DFF] focus-visible:ring-offset-2",
+                open
+                  ? "min-w-[min(18rem,78vw)] flex-[3] shadow-[0_20px_50px_-18px_rgba(10,22,64,0.55)] md:min-w-0"
+                  : "min-w-[3.25rem] flex-[1] md:min-w-0"
+              )}
+            >
+              <FeatureBackdrop kind={f.bg} active={open} />
+              <div
+                className={cn(
+                  "absolute inset-0 transition-colors duration-500",
+                  open
+                    ? "bg-gradient-to-t from-[#071124]/95 via-[#0A1640]/55 to-[#0A1640]/15"
+                    : "bg-[#0A1640]/55 group-hover:bg-[#0A1640]/40"
+                )}
+                aria-hidden="true"
+              />
+
+              <span
+                className={cn(
+                  "absolute z-10 flex size-11 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm transition-all duration-500",
+                  open
+                    ? "left-5 top-5 md:left-6 md:top-6"
+                    : "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                )}
+                aria-hidden="true"
+              >
+                <Icon className="size-5" strokeWidth={2.25} />
+              </span>
+
+              <div
+                className={cn(
+                  "absolute inset-x-0 bottom-0 z-10 p-5 transition-all duration-500 md:p-6",
+                  open
+                    ? "translate-y-0 opacity-100 delay-75"
+                    : "pointer-events-none translate-y-3 opacity-0"
+                )}
+              >
+                <h3 className="font-display text-xl font-bold tracking-tight text-white md:text-2xl">
+                  {f.title}
+                </h3>
+                <p className="mt-2 max-w-sm text-sm font-medium leading-relaxed text-white/85 md:text-[15px]">
+                  {f.line}
+                </p>
+              </div>
+            </button>
           );
         })}
-      </ul>
+      </div>
+
+      <div
+        className="mt-5 flex justify-center gap-1.5 md:hidden"
+        role="tablist"
+        aria-label="Seleccionar función"
+      >
+        {FEATURES.map((f, idx) => (
+          <button
+            key={f.id}
+            type="button"
+            role="tab"
+            aria-selected={active === idx}
+            aria-label={f.title}
+            onClick={() => select(idx)}
+            className={cn(
+              "h-1.5 rounded-full transition-all",
+              active === idx ? "w-6 bg-[#007DFF]" : "w-1.5 bg-slate-300"
+            )}
+          />
+        ))}
+      </div>
     </Section>
   );
 }
 
-function FeatureCrop({ index }: { index: number }) {
-  switch (index) {
-    case 0:
+function FeatureBackdrop({
+  kind,
+  active,
+}: {
+  kind: (typeof FEATURES)[number]["bg"];
+  active: boolean;
+}) {
+  if (kind === "ruta") {
+    return (
+      <Image
+        src="/brand/platform-ruta-diaria-web.jpg"
+        alt=""
+        fill
+        sizes="(max-width: 768px) 80vw, 40vw"
+        className={cn(
+          "object-cover object-left-top transition-transform duration-700",
+          active ? "scale-105" : "scale-100"
+        )}
+        aria-hidden
+      />
+    );
+  }
+  if (kind === "mapa" || kind === "geo") {
+    return (
+      <Image
+        src="/brand/platform-entregas-mapa-web.jpg"
+        alt=""
+        fill
+        sizes="(max-width: 768px) 80vw, 40vw"
+        className={cn(
+          "object-cover transition-transform duration-700",
+          kind === "geo" ? "object-right" : "object-center",
+          active ? "scale-105" : "scale-100"
+        )}
+        aria-hidden
+      />
+    );
+  }
+
+  return (
+    <div
+      className="absolute inset-0 bg-[#0c1830]"
+      aria-hidden="true"
+    >
+      <div
+        className={cn(
+          "absolute inset-0 origin-top-left scale-[1.15] p-4 transition-opacity duration-500",
+          active ? "opacity-100" : "opacity-80"
+        )}
+      >
+        <UiCrop kind={kind} />
+      </div>
+    </div>
+  );
+}
+
+function UiCrop({ kind }: { kind: (typeof FEATURES)[number]["bg"] }) {
+  switch (kind) {
+    case "gps":
       return (
-        <div className="flex items-end justify-between gap-2">
-          <div className="flex-1 space-y-1">
-            {["A · 42 km", "B · 38 km", "C · 51 km"].map((r, i) => (
-              <div
-                key={r}
-                className="flex items-center gap-2 rounded-lg bg-white px-2 py-1 ring-1 ring-slate-100"
-              >
-                <span
-                  className={`size-1.5 rounded-full ${i === 1 ? "bg-[#10b981]" : "bg-slate-300"}`}
-                />
-                <span className="text-[9px] font-semibold text-slate-600">
-                  {r}
-                </span>
-                {i === 1 ? (
-                  <span className="ml-auto text-[8px] font-black uppercase text-[#10b981]">
-                    Mejor
-                  </span>
-                ) : null}
-              </div>
-            ))}
-          </div>
-          <div className="relative size-14 shrink-0 rounded-xl bg-[#e8f2ff]">
-            <span className="absolute left-2 top-3 size-2 rounded-full bg-[#007DFF]" />
-            <span className="absolute right-3 top-5 size-1.5 rounded-full bg-[#10b981]" />
-            <span className="absolute bottom-3 left-5 size-1.5 rounded-full bg-amber-400" />
-            <svg className="absolute inset-2 opacity-60" viewBox="0 0 40 40">
-              <path
-                d="M6 28 Q14 10 22 18 T34 12"
-                fill="none"
-                stroke="#007DFF"
-                strokeWidth="1.5"
-              />
-            </svg>
-          </div>
-        </div>
-      );
-    case 1:
-      return (
-        <div className="relative h-16 overflow-hidden rounded-xl bg-[#dbeafe]">
-          <div className="absolute inset-0 opacity-40">
-            <div className="absolute left-4 top-3 h-px w-20 bg-slate-400/50" />
-            <div className="absolute left-10 top-8 h-px w-16 bg-slate-400/50" />
-            <div className="absolute bottom-4 left-6 h-px w-24 bg-slate-400/50" />
-          </div>
-          <div className="absolute left-1/3 top-1/2 flex -translate-y-1/2 items-center gap-1">
-            <span className="size-2.5 rounded-full bg-[#007DFF] ring-2 ring-white shadow" />
-            <span className="rounded bg-white px-1.5 py-0.5 text-[8px] font-bold text-[#0A1640] shadow-sm">
-              ABC123
-            </span>
-          </div>
-          <span className="absolute right-4 top-3 size-2 rounded-full bg-[#10b981] ring-2 ring-white" />
-          <span className="absolute bottom-3 left-8 size-2 rounded-full bg-amber-400 ring-2 ring-white" />
-        </div>
-      );
-    case 2:
-      return (
-        <div className="rounded-xl bg-white p-2 ring-1 ring-slate-100">
-          <div className="mb-1 flex items-center justify-between">
-            <span className="font-mono text-[9px] font-bold text-slate-700">
+        <div className="h-full rounded-xl bg-[#dbeafe] p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-mono text-[10px] font-bold text-slate-700">
               XYZ789
             </span>
-            <span className="text-[8px] font-semibold text-slate-400">
+            <span className="text-[9px] font-semibold text-slate-500">
               08:12 → 14:40
             </span>
           </div>
-          <svg viewBox="0 0 120 28" className="h-7 w-full">
+          <svg viewBox="0 0 200 120" className="h-[70%] w-full">
             <path
-              d="M2 22 C20 22 28 6 45 10 S70 24 90 8 S110 4 118 12"
+              d="M8 90 C40 90 50 30 80 40 S120 100 150 35 S180 20 192 45"
               fill="none"
               stroke="#007DFF"
-              strokeWidth="2"
+              strokeWidth="3"
               strokeLinecap="round"
+              className="route-line"
             />
-            <circle cx="2" cy="22" r="2" fill="#94a3b8" />
-            <circle cx="118" cy="12" r="2" fill="#10b981" />
+            <circle cx="8" cy="90" r="4" fill="#94a3b8" />
+            <circle cx="192" cy="45" r="4" fill="#10b981" />
           </svg>
         </div>
       );
-    case 3:
+    case "chat":
       return (
-        <div className="space-y-1.5">
-          <div className="ml-auto max-w-[75%] rounded-lg rounded-tr-sm bg-[#007DFF] px-2 py-1 text-[9px] font-semibold text-white">
+        <div className="flex h-full flex-col justify-end gap-2 rounded-xl bg-slate-100/90 p-3">
+          <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-[#007DFF] px-3 py-2 text-[11px] font-semibold text-white">
             CIS Norte listo
           </div>
-          <div className="max-w-[75%] rounded-lg rounded-tl-sm bg-white px-2 py-1 text-[9px] font-semibold text-slate-600 ring-1 ring-slate-100">
+          <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 text-[11px] font-semibold text-slate-600 shadow-sm">
             Conductor 1 · en camino
           </div>
-        </div>
-      );
-    case 4:
-      return (
-        <div className="flex items-center gap-2 rounded-xl bg-white p-2 ring-1 ring-slate-100">
-          <span className="relative flex size-8 items-center justify-center rounded-full bg-[#007DFF]/15 text-[#007DFF]">
-            <Bell className="size-3.5" />
-            <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-[#ef4444] ring-2 ring-white" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[9px] font-bold text-[#0A1640]">
-              Llegada · visita 4
-            </p>
-            <p className="text-[8px] text-slate-500">Push en vivo · hace 12 s</p>
+          <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-[#007DFF] px-3 py-2 text-[11px] font-semibold text-white">
+            Visita 4 confirmada
           </div>
         </div>
       );
-    case 5:
+    case "soportes":
       return (
-        <div className="flex items-end gap-1 rounded-xl bg-white p-2 ring-1 ring-slate-100">
-          {[40, 55, 48, 72, 68, 85, 90].map((h, i) => (
-            <div
-              key={i}
-              className="flex-1 rounded-t bg-[#007DFF]/25"
-              style={{ height: `${h * 0.28}px` }}
-            >
-              <div
-                className="w-full rounded-t bg-[#007DFF]"
-                style={{ height: `${h * 0.18}px`, marginTop: "auto" }}
-              />
-            </div>
-          ))}
-          <span className="ml-1 self-center text-[8px] font-black uppercase tracking-wider text-[#007DFF]">
-            6 p. m.
-          </span>
+        <div className="grid h-full grid-rows-[1fr_auto] gap-2 rounded-xl bg-white/95 p-3">
+          <div className="flex items-center justify-center rounded-xl bg-slate-100">
+            <Camera className="size-10 text-[#007DFF]/70" />
+          </div>
+          <div className="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] font-bold text-emerald-700">
+            Foto de cierre · CIS Norte ✓
+          </div>
         </div>
       );
-    case 6:
+    case "liquidacion":
       return (
-        <div className="space-y-1 rounded-xl bg-white p-2 font-mono text-[8px] ring-1 ring-slate-100">
-          <p className="text-slate-400">14:02 · ruta.edit</p>
-          <p className="text-slate-600">14:05 · visita.completada</p>
-          <p className="font-bold text-[#007DFF]">14:08 · chat.mensaje</p>
-        </div>
-      );
-    case 7:
-      return (
-        <div className="flex gap-2">
-          {["PDF", "CSV", "XLS"].map((fmt) => (
+        <div className="space-y-2 rounded-xl bg-white/95 p-3">
+          <p className="text-[10px] font-black uppercase tracking-wider text-[#007DFF]">
+            Liquidación · Soportes
+          </p>
+          {[
+            { route: "ABC123", h: "8 h" },
+            { route: "XYZ789", h: "6 h" },
+          ].map((r) => (
             <div
-              key={fmt}
-              className="flex flex-1 flex-col items-center gap-1 rounded-xl bg-white py-2 ring-1 ring-slate-100"
+              key={r.route}
+              className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5"
             >
-              <Download className="size-3 text-[#007DFF]" />
-              <span className="text-[8px] font-black uppercase tracking-wider text-slate-600">
-                {fmt}
+              <span className="text-xs font-bold text-slate-800">
+                Ruta {r.route}
               </span>
+              <span className="text-sm font-bold text-[#007DFF]">{r.h}</span>
             </div>
           ))}
-        </div>
-      );
-    default:
-      return (
-        <div className="flex gap-1.5 overflow-hidden">
-          {VISIT_STATUS.slice(0, 3).map((s) => (
-            <div
-              key={s.key}
-              className="min-w-0 flex-1 rounded-lg bg-white px-1.5 py-1.5 ring-1 ring-slate-100"
-            >
-              <p className="truncate text-[8px] font-bold text-slate-700">
-                Paciente
-              </p>
+          <div className="flex flex-wrap gap-1 pt-1">
+            {VISIT_STATUS.slice(0, 3).map((s) => (
               <span
-                className="mt-0.5 inline-block rounded px-1 text-[7px] font-bold text-white"
+                key={s.key}
+                className="rounded-full px-2 py-0.5 text-[8px] font-bold text-white"
                 style={{ background: s.color }}
               >
                 {s.label}
               </span>
+            ))}
+          </div>
+        </div>
+      );
+    case "reportes":
+      return (
+        <div className="flex h-full items-end gap-1.5 rounded-xl bg-white/95 p-4">
+          {[40, 55, 48, 72, 68, 85, 90].map((h, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-t-md bg-[#007DFF]/25"
+              style={{ height: `${h}%` }}
+            >
+              <div
+                className="w-full rounded-t-md bg-[#007DFF]"
+                style={{ height: "70%" }}
+              />
             </div>
           ))}
+          <span className="mb-1 ml-1 text-[9px] font-black uppercase tracking-wider text-[#007DFF]">
+            6 p. m.
+          </span>
         </div>
+      );
+    default:
+      return (
+        <div className="h-full rounded-xl bg-gradient-to-br from-[#007DFF]/40 to-[#0A1640]" />
       );
   }
 }
