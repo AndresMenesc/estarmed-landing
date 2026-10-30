@@ -90,7 +90,7 @@ export function FeatureGrid() {
         role="listbox"
         aria-label="Funciones clave"
         aria-activedescendant={`feature-card-${FEATURES[active].id}`}
-        className="mt-10 flex h-[min(28rem,72vw)] gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-y md:h-[32rem] md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden"
+        className="mt-10 flex h-[26rem] gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-y sm:h-[28rem] md:h-[30rem] lg:overflow-x-auto [&::-webkit-scrollbar]:hidden"
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={() => {
@@ -111,50 +111,70 @@ export function FeatureGrid() {
               aria-label={f.title}
               onClick={() => select(idx)}
               onMouseEnter={() => {
-                if (window.matchMedia("(hover: hover)").matches) select(idx);
+                if (window.matchMedia("(hover: hover) and (min-width: 768px)").matches) {
+                  select(idx);
+                }
               }}
               className={cn(
-                "group relative h-full shrink-0 overflow-hidden rounded-2xl text-left shadow-[0_12px_40px_-16px_rgba(10,22,64,0.45)] outline-none transition-[flex-grow,min-width,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-[#007DFF] focus-visible:ring-offset-2",
+                "group relative h-full shrink-0 overflow-hidden rounded-2xl text-left outline-none transition-[width,flex-grow,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:ring-2 focus-visible:ring-[#007DFF] focus-visible:ring-offset-2",
                 open
-                  ? "min-w-[min(18rem,78vw)] flex-[3] shadow-[0_20px_50px_-18px_rgba(10,22,64,0.55)] md:min-w-0"
-                  : "min-w-[3.25rem] flex-[1] md:min-w-0"
+                  ? "w-[min(22rem,78vw)] flex-none shadow-[0_20px_50px_-18px_rgba(10,22,64,0.55)] md:w-auto md:min-w-[18rem] md:max-w-[26rem] md:flex-[3.5]"
+                  : "w-[4.5rem] flex-none shadow-[0_12px_40px_-16px_rgba(10,22,64,0.45)] md:w-20"
               )}
             >
-              <FeatureBackdrop kind={f.bg} active={open} />
+              {/* Solid dark base — always present so collapsed never shows UI text */}
               <div
-                className={cn(
-                  "absolute inset-0 transition-colors duration-500",
-                  open
-                    ? "bg-gradient-to-t from-[#071124]/95 via-[#0A1640]/55 to-[#0A1640]/15"
-                    : "bg-[#0A1640]/55 group-hover:bg-[#0A1640]/40"
-                )}
+                className="absolute inset-0 bg-[#0A1640]"
                 aria-hidden="true"
               />
+              {/* Soft abstract glow (no text) on collapsed strips */}
+              {!open ? (
+                <div
+                  className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(0,125,255,0.35),transparent_55%),radial-gradient(ellipse_at_70%_80%,rgba(61,155,255,0.2),transparent_50%)]"
+                  aria-hidden="true"
+                />
+              ) : null}
 
+              {/* UI / screenshot only when open */}
+              {open ? (
+                <div className="absolute inset-0" aria-hidden="true">
+                  <FeatureBackdrop kind={f.bg} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#071124] via-[#0A1640]/70 to-[#0A1640]/25" />
+                </div>
+              ) : (
+                /* Full opaque dark veil — belt-and-suspenders against any bleed */
+                <div
+                  className="absolute inset-0 bg-[#0A1640]/90"
+                  aria-hidden="true"
+                />
+              )}
+
+              {/* Icon: centered when collapsed, top-left when open */}
               <span
                 className={cn(
-                  "absolute z-10 flex size-11 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm transition-all duration-500",
+                  "absolute z-10 flex items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-sm transition-all duration-500",
                   open
-                    ? "left-5 top-5 md:left-6 md:top-6"
-                    : "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    ? "left-5 top-5 size-11 md:left-6 md:top-6"
+                    : "left-1/2 top-1/2 size-10 -translate-x-1/2 -translate-y-1/2"
                 )}
                 aria-hidden="true"
               >
                 <Icon className="size-5" strokeWidth={2.25} />
               </span>
 
+              {/* Copy only on open card */}
               <div
                 className={cn(
-                  "absolute inset-x-0 bottom-0 z-10 p-5 transition-all duration-500 md:p-6",
+                  "absolute inset-x-0 bottom-0 z-10 overflow-hidden p-5 transition-all duration-500 md:p-6",
                   open
                     ? "translate-y-0 opacity-100 delay-75"
-                    : "pointer-events-none translate-y-3 opacity-0"
+                    : "pointer-events-none invisible translate-y-4 opacity-0"
                 )}
               >
-                <h3 className="font-display text-xl font-bold tracking-tight text-white md:text-2xl">
+                <h3 className="truncate font-display text-xl font-bold tracking-tight text-white md:text-2xl">
                   {f.title}
                 </h3>
-                <p className="mt-2 max-w-sm text-sm font-medium leading-relaxed text-white/85 md:text-[15px]">
+                <p className="mt-2 line-clamp-3 max-w-sm text-pretty text-sm font-medium leading-relaxed text-white/85 [overflow-wrap:normal] [word-break:normal] md:text-[15px]">
                   {f.line}
                 </p>
               </div>
@@ -189,10 +209,8 @@ export function FeatureGrid() {
 
 function FeatureBackdrop({
   kind,
-  active,
 }: {
   kind: (typeof FEATURES)[number]["bg"];
-  active: boolean;
 }) {
   if (kind === "ruta") {
     return (
@@ -200,12 +218,10 @@ function FeatureBackdrop({
         src="/brand/platform-ruta-diaria-web.jpg"
         alt=""
         fill
-        sizes="(max-width: 768px) 80vw, 40vw"
-        className={cn(
-          "object-cover object-left-top transition-transform duration-700",
-          active ? "scale-105" : "scale-100"
-        )}
+        sizes="(max-width: 768px) 80vw, 26rem"
+        className="object-cover object-left-top"
         aria-hidden
+        priority={false}
       />
     );
   }
@@ -215,11 +231,10 @@ function FeatureBackdrop({
         src="/brand/platform-entregas-mapa-web.jpg"
         alt=""
         fill
-        sizes="(max-width: 768px) 80vw, 40vw"
+        sizes="(max-width: 768px) 80vw, 26rem"
         className={cn(
-          "object-cover transition-transform duration-700",
-          kind === "geo" ? "object-right" : "object-center",
-          active ? "scale-105" : "scale-100"
+          "object-cover",
+          kind === "geo" ? "object-right" : "object-center"
         )}
         aria-hidden
       />
@@ -227,16 +242,8 @@ function FeatureBackdrop({
   }
 
   return (
-    <div
-      className="absolute inset-0 bg-[#0c1830]"
-      aria-hidden="true"
-    >
-      <div
-        className={cn(
-          "absolute inset-0 origin-top-left scale-[1.15] p-4 transition-opacity duration-500",
-          active ? "opacity-100" : "opacity-80"
-        )}
-      >
+    <div className="absolute inset-0 bg-[#0c1830]" aria-hidden="true">
+      <div className="absolute inset-0 origin-top-left scale-[1.05] p-4">
         <UiCrop kind={kind} />
       </div>
     </div>
